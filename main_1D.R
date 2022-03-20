@@ -13,8 +13,8 @@ D = rbind(D, cbind(matrix(3, nr = 400, nc = 1), rexp(n = 400, 2)))
 X0 = D[,2:2]
 
 yy = density(X0)
-colscale = c("black", "red")
-plot(yy, type="l", ylab="Density", xlab="x", ylim=c(0,1.5*max(yy$y)), las=1, lwd=2, main="Nonparametric density estimation")
+colscale = c("black", "red","blue")
+plot(yy, type="l", ylab="Density", xlab="x", ylim=c(0,2*max(yy$y)), las=1, lwd=2, main="Nonparametric density estimation")
 
 xx = seq(-10, 15, length=200)
 real_density = (5/12)*dnorm(xx, -5, 1) + (3/12)*dgamma(xx, 24, 4) + (4/12)*dexp(xx, 2)
@@ -49,7 +49,7 @@ for (i in 1:max_iteration) {
   ## Visualization
   plot(yy, type="l", ylab="Density", xlab="x", las=1, lwd=2)
   points(X0, y=rep(0,nrow(X)), pch=1, col=rainbow(max(cluster_lab))[cluster_lab])
-  
+  # legend(7, 0.10, c("Cluster 1","Cluster 2","Cluster 3"), col=rainbow(max(cluster_lab)), lty=c(0,0,0), pch = 1,lwd=2, bty="n")
   
   
   ## (2) Goodness of fit (Google: Goodness of fit in R)
@@ -76,7 +76,18 @@ for (i in 1:max_iteration) {
   
   ## Visualization
   yy = density(X0)
-  plot(yy, type="l", ylab="Density", xlab="x", las=1, lwd=2)
+  plot(yy, type="l", ylab="Density", xlab="x", ylim=c(0,2*max(yy$y)), las=1, lwd=2)
+  
+  xx = seq(-10, 15, length=200)
+  real_density = (5/12)*dnorm(xx, -5, 1) + (3/12)*dgamma(xx, 24, 4) + (4/12)*dexp(xx, 2)
+  lines(xx, real_density, col=colscale[2], lty=2, lwd=2)
+  
+  estimated_density = (499/1200)*dnorm(xx, -4.983, 0.967) + (405/1200)*dexp(xx, 1.795) + (296/1200)*dlnorm(xx, 1.777, 0.194)
+  lines(xx, estimated_density, col=colscale[3], lty=3, lwd=2)
+  
+  
+  points(X0, y=rep(0,nrow(X)), pch=1, col=rainbow(max(cluster_lab))[cluster_lab])
+  legend(7, 0.10, c("KDE","True distribution","Estimateddensity"), col=colscale[c(1,2,3)], lty=c(1,2,3), lwd=2, bty="n")
 }
 
 
