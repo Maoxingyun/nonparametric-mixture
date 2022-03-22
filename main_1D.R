@@ -23,7 +23,7 @@ lines(xx, real_density, col=colscale[2], lty=2, lwd=2)
 points(X0, y=rep(0,length(X0)), pch=1)
 legend(7, 0.10, c("KDE","True distribution"), col=colscale[c(1,2)], lty=c(1,2), lwd=2, bty="n")
 
-max_iteration = 3
+max_iteration = 1
 for (i in 1:max_iteration) {
   X = scale(X0) ## scale only for EMC nonparametric clustering
   ## (1) Nonparametric clustering
