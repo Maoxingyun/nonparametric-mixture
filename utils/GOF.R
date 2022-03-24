@@ -23,7 +23,7 @@ GOF = function(X, all_dist, cluster_lab){
   for(i in 1:max(cluster_lab)){
     data = cluster_hash[[as.character(i)]]
     significant_level = 0.05
-    pvalue = 0
+    pvalue = -1
     
     ## process data, leave only positive number
     processed_data = data[data>0]
