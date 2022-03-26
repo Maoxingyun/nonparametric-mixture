@@ -1,3 +1,4 @@
+# setwd("D:/HW/¿ÆÑÐ/Code/nonparametric-mixture/utils")
 library("TDA")
 library(fossil)
 library(MASS)
@@ -13,7 +14,7 @@ D = rbind(D, cbind(matrix(2, nr = 300, nc = 1), rgamma(n = 300, 24, 4)))
 D = rbind(D, cbind(matrix(3, nr = 400, nc = 1), rexp(n = 400, 2)))
 # Add Noise
 D = rbind(D, cbind(matrix(-1, nr = 300, nc = 1), runif(n = 300, min = -10, max = 10))) # uniform noise
-## TODO: Gaussian noise
+D[,2:2] = D[,2:2]+rnorm(n = nrow(D), 0, 0.25) # Gaussian noise
 
 X0 = D[,2:2]
 labels = D[,1:1]
@@ -35,7 +36,7 @@ legend(7, 0.10, c("KDE","True distribution"), col=colscale[c(1,2)], lty=c(1,2), 
 
 # ========== Clustering algorithm ========== # 
 
-max_iteration = 3
+max_iteration = 5
 for (i in 1:max_iteration) {
   print(paste("Iteration", i))
   # ========== step 1: Nonparametric clustering ========== #
