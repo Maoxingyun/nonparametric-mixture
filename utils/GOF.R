@@ -29,7 +29,7 @@ GOF = function(X, all_dist, cluster_lab){
     processed_data = data[data>0]
     
     ## fit the distribution
-    for (j in 1:total_dist) {
+    for (j in 1:length(all_dist)) {
       if (all_dist[[as.character(j)]] != "norm") {
         if (length(processed_data) < 0.5*length(data)) {
           next

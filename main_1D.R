@@ -1,4 +1,4 @@
-# setwd("D:/HW/科研/Code/nonparametric-mixture/utils")
+setwd("D:/HW/科研/Code/nonparametric-mixture/utils")
 library("TDA")
 library(fossil)
 library(MASS)
@@ -8,13 +8,13 @@ source("Refinement.R")
 
 # ========== Generate data ========== #
 # Sub-distributions
-D = rnorm(n = 500, -5,1)
-D = cbind(matrix(1, nr = 500, nc = 1), D)
-D = rbind(D, cbind(matrix(2, nr = 300, nc = 1), rgamma(n = 300, 24, 4)))
+D = rnorm(n = 400, 10,1)
+D = cbind(matrix(1, nr = 400, nc = 1), D)
+D = rbind(D, cbind(matrix(2, nr = 400, nc = 1), rgamma(n = 400, 24, 4)))
 D = rbind(D, cbind(matrix(3, nr = 400, nc = 1), rexp(n = 400, 2)))
 # Add Noise
-D = rbind(D, cbind(matrix(-1, nr = 300, nc = 1), runif(n = 300, min = -10, max = 10))) # uniform noise
-D[,2:2] = D[,2:2]+rnorm(n = nrow(D), 0, 0.25) # Gaussian noise
+# D = rbind(D, cbind(matrix(-1, nr = 300, nc = 1), runif(n = 300, min = -10, max = 10))) # uniform noise
+# D[,2:2] = D[,2:2]+rnorm(n = nrow(D), 0, 0.25) # Gaussian noise
 
 X0 = D[,2:2]
 labels = D[,1:1]
@@ -27,7 +27,7 @@ colscale = c("black", "red")
 plot(yy, type="l", ylab="Density", xlab="x", ylim=c(0,1.5*max(yy$y)), las=1, lwd=2, main="Raw data")
 
 xx = seq(-10, 15, length=200)
-real_density = (5/12)*dnorm(xx, -5, 1) + (3/12)*dgamma(xx, 24, 4) + (4/12)*dexp(xx, 2)
+real_density = (4/12)*dnorm(xx, 10, 1) + (4/12)*dgamma(xx, 24, 4) + (4/12)*dexp(xx, 2)
 lines(xx, real_density, col=colscale[2], lty=2, lwd=2)
 
 points(X0, y=rep(0,length(X0)), pch=1)
@@ -36,13 +36,14 @@ legend(7, 0.10, c("KDE","True distribution"), col=colscale[c(1,2)], lty=c(1,2), 
 
 # ========== Clustering algorithm ========== # 
 
-max_iteration = 5
+max_iteration = 2
 for (i in 1:max_iteration) {
   print(paste("Iteration", i))
   # ========== step 1: Nonparametric clustering ========== #
   print("Step 1...")
   X = scale(X0) ## scale only for EMC nonparametric clustering
-  cluster_lab = Clustering(X) ## EMC method
+  # cluster_lab = Clustering_EMC(X) ## EMC method
+  cluster_lab = Clustering_AWC(X) ## AWC method
   
   # TODO
   ## (1.1) "Density Clustering" in library('TDA')
@@ -78,8 +79,7 @@ for (i in 1:max_iteration) {
   all_dist[["2"]] <- "lnorm"
   all_dist[["3"]] <- "exp"
   all_dist[["4"]] <- "gamma"
-  all_dist[["5"]] <- "f"
-  total_dist = 5
+  # all_dist[["5"]] <- "f"
   
   
   dist_hash = GOF(X0, all_dist, cluster_lab) ## vsgoftest method
