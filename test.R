@@ -2,7 +2,7 @@ setwd("D:/HW/¿ÆÑÐ/Code/nonparametric-mixture/utils")
 library('reticulate')
 use_python("D:\\Anaconda\\python.exe")
 source_python("awc.py")
-AWC_object <- AWC(speed=1., n_neigh=200)
+AWC_object <- AWC(speed=1., n_neigh=200, n_outliers = 20)
 np <- import("numpy", convert = FALSE)
 
 

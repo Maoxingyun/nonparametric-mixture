@@ -16,7 +16,7 @@ library('reticulate')
 use_python("D:\\Anaconda\\python.exe")
 source_python("awc.py")
 Clustering_AWC = function(X){
-  AWC_object <- AWC(speed=1., n_neigh=300)
+  AWC_object <- AWC(speed=1., n_neigh=200, n_outliers = 20)
   np <- import("numpy", convert = FALSE)
   l = 25
   AWC_object$awc(l, np$array(X))
