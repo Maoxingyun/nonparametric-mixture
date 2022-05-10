@@ -83,7 +83,8 @@ for (i in 1:max_iteration) {
   
   
   # dist_hash = GOF_KL(X0, all_dist, cluster_lab) ## vsgoftest method
-  dist_hash = GOF_KS(X0, all_dist, cluster_lab) ## KS test method
+  # dist_hash = GOF_KS(X0, all_dist, cluster_lab) ## KS test method
+  dist_hash = GOF_CvM(X0, all_dist, cluster_lab) ## Cram¨¦r¨Cvon Mises criterion
   
   ## Print the result
   for (j in 1:length(dist_hash)) {
