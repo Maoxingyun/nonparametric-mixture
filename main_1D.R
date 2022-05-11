@@ -13,7 +13,7 @@ D = cbind(matrix(1, nr = 400, nc = 1), D)
 D = rbind(D, cbind(matrix(2, nr = 400, nc = 1), rgamma(n = 400, 24, 4)))
 D = rbind(D, cbind(matrix(3, nr = 400, nc = 1), rexp(n = 400, 2)))
 # Add Noise
-# D = rbind(D, cbind(matrix(-1, nr = 300, nc = 1), runif(n = 300, min = 0, max = 10))) # uniform noise
+D = rbind(D, cbind(matrix(-1, nr = 300, nc = 1), runif(n = 300, min = 0, max = 10))) # uniform noise
 # D[,2:2] = D[,2:2]+rnorm(n = nrow(D), 0, 0.25) # Gaussian noise
 
 X0 = D[,2:2]
@@ -83,8 +83,13 @@ for (i in 1:max_iteration) {
   
   
   # dist_hash = GOF_KL(X0, all_dist, cluster_lab) ## vsgoftest method
+  
+  ## The following three are from https://www.r-bloggers.com/2015/01/goodness-of-fit-test-in-r/
   # dist_hash = GOF_KS(X0, all_dist, cluster_lab) ## KS test method
-  dist_hash = GOF_CvM(X0, all_dist, cluster_lab) ## Cram¨¦r¨Cvon Mises criterion
+  # dist_hash = GOF_CvM(X0, all_dist, cluster_lab) ## Cram¨¦r¨Cvon Mises criterion
+  dist_hash = GOF_Chi(X0, all_dist, cluster_lab) ## Chi square test
+  
+  
   
   ## Print the result
   for (j in 1:length(dist_hash)) {
@@ -97,7 +102,6 @@ for (i in 1:max_iteration) {
   ## (2.1) ## xxx.test see https://www.r-bloggers.com/2015/01/goodness-of-fit-test-in-r/
   ## (2.2) library('goft')
   ## (2.3) 'gofTest' in R
-  ## (2.4) Methods in "All of statistics"
   
   # ========== step 3: Data refinement ========== #
   print("Step 3...")

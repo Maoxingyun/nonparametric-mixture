@@ -2,7 +2,7 @@ num_of_samples = 1000
 x <- rgamma(num_of_samples, shape = 10, scale = 3)
 x <- x + rnorm(length(x), mean=0, sd = .1)
 
-p1 <- hist(x,breaks=50, include.lowest=FALSE, right=FALSE)
+p1 = hist(x[which(x>0)],breaks=50, include.lowest=FALSE, right=FALSE, plot=FALSE)
 
 # Chi Square test
 library('zoo')
