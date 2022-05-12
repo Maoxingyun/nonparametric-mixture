@@ -228,6 +228,76 @@ GOF_Chi = function(X, all_dist, cluster_lab){
 
 
 
+## goftest
+library('goftest')
+GOF_goftest = function(X, all_dist, cluster_lab, testStr){
+  ## testStr = "CvM" / "AD"
+  num_of_samples = 1000
+  cluster_hash <- new.env() ## <cluster_lab, data points>
+  for(i in 1:max(cluster_lab)){
+    single_X = X[which(cluster_lab==i)]
+    cluster_hash[[as.character(i)]] <- single_X
+  }
+  
+  
+  dist_hash <- new.env() ## <cluster_lab, distribution> 
+  ## distribution is a list, name = "distribution name", parameter = c(parametric vector)
+  for(i in 1:max(cluster_lab)){
+    data = cluster_hash[[as.character(i)]]
+    significant_level = 0.05
+    pvalue = -1
+    
+    ## process data, leave only positive number
+    processed_data = data[data>0]
+    
+    ## fit the distribution
+    for (j in 1:length(all_dist)) {
+      if (all_dist[[as.character(j)]] == "norm") {
+        mle = vs.test(x = data, "dnorm", extend = TRUE, relax = TRUE)
+        if (testStr == "CvM") {
+          # result = cvm.test(data, "pnorm", mle$estimate[1], mle$estimate[2], estimated=TRUE)
+          # When estimated = TRUE, the test statistics is not stable
+          result = cvm.test(data, "pnorm", mle$estimate[1], mle$estimate[2])
+        } else {
+          result = ad.test(data, "pnorm", mle$estimate[1], mle$estimate[2])
+        }
+
+      } else if (all_dist[[as.character(j)]] == "lnorm") {
+        mle = vs.test(x = data[which(data>0)], "dlnorm", extend = TRUE, relax = TRUE)
+        if (testStr == "CvM") {
+          result = cvm.test(data, "plnorm", mle$estimate[1], mle$estimate[2])
+        } else {
+          result = ad.test(data, "plnorm", mle$estimate[1], mle$estimate[2])
+        }
+        
+      } else if (all_dist[[as.character(j)]] == "exp") {
+        mle = vs.test(x = data[which(data>0)], "dexp", extend = TRUE, relax = TRUE)
+        if (testStr == "CvM") {
+          result = cvm.test(data, "pexp", mle$estimate[1])
+        } else {
+          result = ad.test(data, "pexp", mle$estimate[1])
+        }
+        
+      } else if (all_dist[[as.character(j)]] == "gamma") {
+        mle = vs.test(x = data[which(data>0)], "dgamma", extend = TRUE, relax = TRUE)
+        if (testStr == "CvM") {
+          result = cvm.test(data, "pgamma", mle$estimate[1], mle$estimate[2])
+        } else {
+          result = ad.test(data, "pgamma", mle$estimate[1], mle$estimate[2])
+        }
+        
+      }
+      
+      if (result$p.value > pvalue) {
+        pvalue = result$p.value
+        dist_hash[[as.character(i)]] <- list(name = all_dist[[as.character(j)]], parameter = mle$estimate)
+      }
+    }
+  }
+  return(dist_hash)
+}
+
+
 
 
 
