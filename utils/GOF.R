@@ -358,5 +358,64 @@ GOF_goft = function(X, all_dist, cluster_lab){
 
 
 
+## dbEmpLikeGOF
+library('dbEmpLikeGOF')
+GOF_dbEmpLikeGOF = function(X, all_dist, cluster_lab){
+  cluster_hash <- new.env() ## <cluster_lab, data points>
+  for(i in 1:max(cluster_lab)){
+    single_X = X[which(cluster_lab==i)]
+    cluster_hash[[as.character(i)]] <- single_X
+  }
+  
+  
+  dist_hash <- new.env() ## <cluster_lab, distribution> 
+  ## distribution is a list, name = "distribution name", parameter = c(parametric vector)
+  for(i in 1:max(cluster_lab)){
+    data = cluster_hash[[as.character(i)]]
+    significant_level = 0.05
+    pvalue = -1
+    
+    ## process data, leave only positive number
+    processed_data = data[data>0]
+    
+    ## fit the distribution
+    for (j in 1:length(all_dist)) {
+      if (all_dist[[as.character(j)]] == "norm") {
+        mle = vs.test(x = data, "dnorm", extend = TRUE, relax = TRUE)
+        Fx = pnorm(data, mle$estimate[1], mle$estimate[2])
+        a <- dbEmpLikeGOF(x = Fx, testcall = "uniform", pvl.Table = FALSE, num.mc = 5000)
+      
+        
+      } else if (all_dist[[as.character(j)]] == "lnorm") {
+        mle = vs.test(x = data, "dlnorm", extend = TRUE, relax = TRUE)
+        Fx = plnorm(data, mle$estimate[1], mle$estimate[2])
+        a <- dbEmpLikeGOF(x = Fx, testcall = "uniform", pvl.Table = FALSE, num.mc = 5000)
+        
+      } else if (all_dist[[as.character(j)]] == "exp") {
+        mle = vs.test(x = data, "dexp", extend = TRUE, relax = TRUE)
+        Fx = pexp(data, mle$estimate[1])
+        a <- dbEmpLikeGOF(x = Fx, testcall = "uniform", pvl.Table = FALSE, num.mc = 5000)
+        
+      } else if (all_dist[[as.character(j)]] == "gamma") {
+        mle = vs.test(x = data, "dgamma", extend = TRUE, relax = TRUE)
+        Fx = pgamma(data, mle$estimate[1], mle$estimate[2])
+        a <- dbEmpLikeGOF(x = Fx, testcall = "uniform", pvl.Table = FALSE, num.mc = 5000)
+        
+      }
+      
+      if (a$pvalue > pvalue) {
+        pvalue = a$pvalue
+        dist_hash[[as.character(i)]] <- list(name = all_dist[[as.character(j)]], parameter = mle$estimate)
+      }
+    }
+  }
+  return(dist_hash)
+}
+
+
+
+
+
+
 
 
