@@ -167,7 +167,6 @@ GOF_CvM = function(X, all_dist, cluster_lab){
 ## Chi square test
 library('zoo')
 GOF_Chi = function(X, all_dist, cluster_lab){
-  num_of_samples = 1000
   cluster_hash <- new.env() ## <cluster_lab, data points>
   for(i in 1:max(cluster_lab)){
     single_X = X[which(cluster_lab==i)]
@@ -232,7 +231,6 @@ GOF_Chi = function(X, all_dist, cluster_lab){
 library('goftest')
 GOF_goftest = function(X, all_dist, cluster_lab, testStr){
   ## testStr = "CvM" / "AD"
-  num_of_samples = 1000
   cluster_hash <- new.env() ## <cluster_lab, data points>
   for(i in 1:max(cluster_lab)){
     single_X = X[which(cluster_lab==i)]
@@ -299,6 +297,61 @@ GOF_goftest = function(X, all_dist, cluster_lab, testStr){
 
 
 
+
+## gof
+library('goft')
+GOF_goft = function(X, all_dist, cluster_lab){
+  cluster_hash <- new.env() ## <cluster_lab, data points>
+  for(i in 1:max(cluster_lab)){
+    single_X = X[which(cluster_lab==i)]
+    cluster_hash[[as.character(i)]] <- single_X
+  }
+  
+  
+  dist_hash <- new.env() ## <cluster_lab, distribution> 
+  ## distribution is a list, name = "distribution name", parameter = c(parametric vector)
+  for(i in 1:max(cluster_lab)){
+    data = cluster_hash[[as.character(i)]]
+    significant_level = 0.05
+    pvalue = -1
+    
+    ## process data, leave only positive number
+    processed_data = data[data>0]
+    
+    ## fit the distribution
+    for (j in 1:length(all_dist)) {
+      if (all_dist[[as.character(j)]] == "norm") {
+        mle = vs.test(x = data, "dnorm", extend = TRUE, relax = TRUE)
+        data = sample(data) # random shuffle
+        if (length(data) > 400) {
+          result = normal_test(x = data[1:400]) # norm_test can only process sample size <= 400
+        } else {
+          result = normal_test(x = data)
+        }
+        # result = shapiro.test(x = data) # not accurate
+        
+      } else if (all_dist[[as.character(j)]] == "lnorm") {
+        mle = vs.test(x = data, "dlnorm", extend = TRUE, relax = TRUE)
+        result = lnorm_test(x = data)
+        
+      } else if (all_dist[[as.character(j)]] == "exp") {
+        mle = vs.test(x = data, "dexp", extend = TRUE, relax = TRUE)
+        result = exp_test(x = data, method = "transf") # method can also be "ratio"
+        
+      } else if (all_dist[[as.character(j)]] == "gamma") {
+        mle = vs.test(x = data, "dgamma", extend = TRUE, relax = TRUE)
+        result = gamma_test(x = data)
+        
+      }
+      
+      if (result$p.value > pvalue) {
+        pvalue = result$p.value
+        dist_hash[[as.character(i)]] <- list(name = all_dist[[as.character(j)]], parameter = mle$estimate)
+      }
+    }
+  }
+  return(dist_hash)
+}
 
 
 

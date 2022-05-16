@@ -83,7 +83,8 @@ for (i in 1:max_iteration) {
   
   
   # dist_hash = GOF_KL(X0, all_dist, cluster_lab) ## vsgoftest package
-  dist_hash = GOF_goftest(X0, all_dist, cluster_lab, "CvM") ## goftest package
+  # dist_hash = GOF_goftest(X0, all_dist, cluster_lab, "CvM") ## goftest package
+  dist_hash = GOF_goft(X0, all_dist, cluster_lab) ## gof package
   
   ## The following three are from https://www.r-bloggers.com/2015/01/goodness-of-fit-test-in-r/
   # dist_hash = GOF_KS(X0, all_dist, cluster_lab) ## KS test method
