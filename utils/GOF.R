@@ -418,4 +418,127 @@ GOF_dbEmpLikeGOF = function(X, all_dist, cluster_lab){
 
 
 
+## Helliger distance
+library('distrEx')
+GOF_distrEx = function(X, all_dist, cluster_lab, testStr){
+  ## testStr = "Helliger" / "TV"
+  cluster_hash <- new.env() ## <cluster_lab, data points>
+  for(i in 1:max(cluster_lab)){
+    single_X = X[which(cluster_lab==i)]
+    cluster_hash[[as.character(i)]] <- single_X
+  }
+  
+  
+  dist_hash <- new.env() ## <cluster_lab, distribution> 
+  ## distribution is a list, name = "distribution name", parameter = c(parametric vector)
+  for(i in 1:max(cluster_lab)){
+    data = cluster_hash[[as.character(i)]]
+    significant_level = 0.05
+    mindistance = 1
+    
+    ## process data, leave only positive number
+    processed_data = data[data>0]
+    
+    ## fit the distribution
+    for (j in 1:length(all_dist)) {
+      if (all_dist[[as.character(j)]] == "norm") {
+        mle = vs.test(x = data, "dnorm", extend = TRUE, relax = TRUE)
+        if (testStr == "Helliger") {
+          result <- HellingerDist(Norm(mean=mle$estimate[1], sd=mle$estimate[2]), data)
+        } else {
+          result <- TotalVarDist(Norm(mean=mle$estimate[1], sd=mle$estimate[2]), data)
+        }
+        
+        
+      } else if (all_dist[[as.character(j)]] == "lnorm") {
+        mle = vs.test(x = data, "dlnorm", extend = TRUE, relax = TRUE)
+        if (testStr == "Helliger") {
+          result <- HellingerDist(Lnorm(mean=mle$estimate[1], sd=mle$estimate[2]), data)
+        } else {
+          result <- TotalVarDist(Lnorm(mean=mle$estimate[1], sd=mle$estimate[2]), data)
+        }
+        
+      } else if (all_dist[[as.character(j)]] == "exp") {
+        mle = vs.test(x = data, "dexp", extend = TRUE, relax = TRUE)
+        if (testStr == "Helliger") {
+          result <- HellingerDist(Exp(mle$estimate[1]), data)
+        } else {
+          result <- TotalVarDist(Exp(mle$estimate[1]), data)
+        }
+        
+      } else if (all_dist[[as.character(j)]] == "gamma") {
+        mle = vs.test(x = data, "dgamma", extend = TRUE, relax = TRUE)
+        if (testStr == "Helliger") {
+          result <- HellingerDist(Gammad(shape=mle$estimate[1], scale=1/mle$estimate[2]), data)
+        } else {
+          result <- TotalVarDist(Gammad(shape=mle$estimate[1], scale=1/mle$estimate[2]), data)
+        }
+        
+      }
+      
+      if (result < mindistance) {
+        mindistance = result
+        dist_hash[[as.character(i)]] <- list(name = all_dist[[as.character(j)]], parameter = mle$estimate)
+      }
+    }
+  }
+  return(dist_hash)
+}
+
+
+
+
+
+
+## Wasserstein distance
+library('transport')
+GOF_wasserstein = function(X, all_dist, cluster_lab, p){
+  # p is the parameter of wasserstein distance
+  cluster_hash <- new.env() ## <cluster_lab, data points>
+  for(i in 1:max(cluster_lab)){
+    single_X = X[which(cluster_lab==i)]
+    cluster_hash[[as.character(i)]] <- single_X
+  }
+  
+  
+  dist_hash <- new.env() ## <cluster_lab, distribution> 
+  ## distribution is a list, name = "distribution name", parameter = c(parametric vector)
+  for(i in 1:max(cluster_lab)){
+    data = cluster_hash[[as.character(i)]]
+    significant_level = 0.05
+    mindistance = 100
+    
+    ## process data, leave only positive number
+    processed_data = data[data>0]
+    
+    ## fit the distribution
+    for (j in 1:length(all_dist)) {
+      if (all_dist[[as.character(j)]] == "norm") {
+        mle = vs.test(x = data, "dnorm", extend = TRUE, relax = TRUE)
+        result <- wasserstein1d(data, rnorm(10*length(data), mle$estimate[1], mle$estimate[2]), p = p, wa = NULL, wb = NULL)
+        
+
+      } else if (all_dist[[as.character(j)]] == "lnorm") {
+        mle = vs.test(x = data, "dlnorm", extend = TRUE, relax = TRUE)
+        result <- wasserstein1d(data, rlnorm(10*length(data), mle$estimate[1], mle$estimate[2]), p = p, wa = NULL, wb = NULL)
+        
+      } else if (all_dist[[as.character(j)]] == "exp") {
+        mle = vs.test(x = data, "dexp", extend = TRUE, relax = TRUE)
+        result <- wasserstein1d(data, rexp(10*length(data), mle$estimate[1]), p = p, wa = NULL, wb = NULL)
+        
+      } else if (all_dist[[as.character(j)]] == "gamma") {
+        mle = vs.test(x = data, "dgamma", extend = TRUE, relax = TRUE)
+        result <- wasserstein1d(data, rgamma(10*length(data), mle$estimate[1], mle$estimate[2]), p = p, wa = NULL, wb = NULL)
+        
+      }
+      
+      if (result < mindistance) {
+        mindistance = result
+        dist_hash[[as.character(i)]] <- list(name = all_dist[[as.character(j)]], parameter = mle$estimate)
+      }
+    }
+  }
+  return(dist_hash)
+}
+
 
