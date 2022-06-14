@@ -41,6 +41,10 @@ GOF_KL = function(X, all_dist, cluster_lab){
         result = vs.test(x = data, densfun = paste("d",all_dist[[as.character(j)]],sep=""))
       }
       
+      # print(i)
+      # print(all_dist[[as.character(j)]])
+      # print(result$p.value)
+      
       if (result$p.value > pvalue) {
         pvalue = result$p.value
         dist_hash[[as.character(i)]] <- list(name = all_dist[[as.character(j)]], parameter = result$estimate)
@@ -91,6 +95,10 @@ GOF_KS = function(X, all_dist, cluster_lab){
         mle = vs.test(x = data[which(data>0)], "dgamma", extend = TRUE, relax = TRUE)
         result = ks.test(x = data, "pgamma", mle$estimate[1], mle$estimate[2])
       }
+      
+      # print(i)
+      # print(all_dist[[as.character(j)]])
+      # print(result$p.value)
       
       if (result$p.value > pvalue) {
         pvalue = result$p.value
@@ -152,6 +160,10 @@ GOF_CvM = function(X, all_dist, cluster_lab){
         result.pvalue = 1/6*exp(-result)
         
       }
+      
+      # print(i)
+      # print(all_dist[[as.character(j)]])
+      # print(result.pvalue)
       
       if (result.pvalue > pvalue) {
         pvalue = result.pvalue
@@ -215,6 +227,10 @@ GOF_Chi = function(X, all_dist, cluster_lab){
         a <- chisq.test(p1$counts, p=null.probs, rescale.p=TRUE, simulate.p.value=TRUE)
         
       }
+      
+      # print(i)
+      # print(all_dist[[as.character(j)]])
+      # print(a$p.value)
       
       if (a$p.value > pvalue) {
         pvalue = a$p.value
@@ -286,6 +302,10 @@ GOF_goftest = function(X, all_dist, cluster_lab, testStr){
         
       }
       
+      # print(i)
+      # print(all_dist[[as.character(j)]])
+      # print(result$p.value)
+      
       if (result$p.value > pvalue) {
         pvalue = result$p.value
         dist_hash[[as.character(i)]] <- list(name = all_dist[[as.character(j)]], parameter = mle$estimate)
@@ -298,7 +318,7 @@ GOF_goftest = function(X, all_dist, cluster_lab, testStr){
 
 
 
-## gof
+## goft
 library('goft')
 GOF_goft = function(X, all_dist, cluster_lab){
   cluster_hash <- new.env() ## <cluster_lab, data points>
@@ -343,6 +363,10 @@ GOF_goft = function(X, all_dist, cluster_lab){
         result = gamma_test(x = data)
         
       }
+      
+      # print(i)
+      # print(all_dist[[as.character(j)]])
+      # print(result$p.value)
       
       if (result$p.value > pvalue) {
         pvalue = result$p.value
@@ -402,6 +426,10 @@ GOF_dbEmpLikeGOF = function(X, all_dist, cluster_lab){
         a <- dbEmpLikeGOF(x = Fx, testcall = "uniform", pvl.Table = FALSE, num.mc = 5000)
         
       }
+      
+      # print(i)
+      # print(all_dist[[as.character(j)]])
+      # print(a$pvalue)
       
       if (a$pvalue > pvalue) {
         pvalue = a$pvalue
@@ -476,6 +504,10 @@ GOF_distrEx = function(X, all_dist, cluster_lab, testStr){
         
       }
       
+      # print(i)
+      # print(all_dist[[as.character(j)]])
+      # print(result)
+      
       if (result < mindistance) {
         mindistance = result
         dist_hash[[as.character(i)]] <- list(name = all_dist[[as.character(j)]], parameter = mle$estimate)
@@ -531,6 +563,10 @@ GOF_wasserstein = function(X, all_dist, cluster_lab, p){
         result <- wasserstein1d(data, rgamma(10*length(data), mle$estimate[1], mle$estimate[2]), p = p, wa = NULL, wb = NULL)
         
       }
+      
+      print(i)
+      print(all_dist[[as.character(j)]])
+      print(result)
       
       if (result < mindistance) {
         mindistance = result

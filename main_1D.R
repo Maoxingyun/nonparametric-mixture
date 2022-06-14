@@ -8,7 +8,7 @@ source("Refinement.R")
 
 # ========== Generate data ========== #
 # Sub-distributions
-D = rnorm(n = 400, 10,1)
+D = rnorm(n = 400, 13,1)
 D = cbind(matrix(1, nr = 400, nc = 1), D)
 D = rbind(D, cbind(matrix(2, nr = 400, nc = 1), rgamma(n = 400, 24, 4)))
 D = rbind(D, cbind(matrix(3, nr = 400, nc = 1), rexp(n = 400, 2)))
@@ -81,9 +81,8 @@ for (i in 1:max_iteration) {
   all_dist[["4"]] <- "gamma"
   # all_dist[["5"]] <- "f"
   
-  
   # dist_hash = GOF_KL(X0, all_dist, cluster_lab) ## vsgoftest package
-  # dist_hash = GOF_goftest(X0, all_dist, cluster_lab, "CvM") ## goftest package
+  # dist_hash = GOF_goftest(X0, all_dist, cluster_lab, "AD") ## goftest package
   # dist_hash = GOF_goft(X0, all_dist, cluster_lab) ## gof package
   # dist_hash = GOF_dbEmpLikeGOF(X0, all_dist, cluster_lab) ## dbEmpLikeGOF package
   # dist_hash = GOF_distrEx(X0, all_dist, cluster_lab, "TV") ## distrEx package about Helliger distance / Total variation distance
@@ -95,7 +94,7 @@ for (i in 1:max_iteration) {
   # dist_hash = GOF_CvM(X0, all_dist, cluster_lab) ## Cram¨¦r¨Cvon Mises criterion
   # dist_hash = GOF_Chi(X0, all_dist, cluster_lab) ## Chi square test
   
-  
+  print("End of GOF")
   
   ## Print the result
   for (j in 1:length(dist_hash)) {
