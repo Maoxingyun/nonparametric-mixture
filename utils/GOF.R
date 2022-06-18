@@ -51,6 +51,54 @@ GOF_KL = function(X, all_dist, cluster_lab){
 }
 
 
+## KL Divergence with degree of membership
+GOF_KL_soft = function(X, all_dist, degree_of_membership, threshold){
+  
+  cluster_hash <- new.env() ## <cluster_lab, data points>
+  for (i in 1:ncol(degree_of_membership)) {
+    single_X = numeric(0)
+    for (j in 1:nrow(degree_of_membership)) {
+      if (degree_of_membership[j,i] > threshold) {
+        single_X = c(single_X, X[j])
+      }
+    }
+    cluster_hash[[as.character(i)]] <- single_X
+  }
+  
+  
+  dist_hash <- new.env() ## <cluster_lab, distribution> 
+  ## distribution is a list, name = "distribution name", parameter = c(parametric vector)
+  for(i in 1:length(cluster_hash)){
+    data = cluster_hash[[as.character(i)]]
+    significant_level = 0.05
+    pvalue = -1
+    
+    ## process data, leave only positive number
+    processed_data = data[data>0]
+    
+    ## fit the distribution
+    for (j in 1:length(all_dist)) {
+      if (all_dist[[as.character(j)]] != "norm") {
+        if (length(processed_data) < 0.5*length(data)) {
+          next
+        }
+        result = vs.test(x = processed_data, densfun = paste("d",all_dist[[as.character(j)]],sep=""))
+      } else {
+        result = vs.test(x = data, densfun = paste("d",all_dist[[as.character(j)]],sep=""))
+      }
+      
+      if (result$p.value > pvalue) {
+        pvalue = result$p.value
+        dist_hash[[as.character(i)]] <- list(name = all_dist[[as.character(j)]], parameter = result$estimate)
+      }
+    }
+  }
+  return(dist_hash)
+}
+
+
+
+
 
 
 ## Kolmogorov-Smirnov Test
