@@ -73,7 +73,8 @@ for (i in 1:max_iteration) {
   print(paste("adjusted rand index:", adj.rand.index(labels[which(labels!=-1)], cluster_lab[which(labels!=-1)])))
   
   ## Get degree of Membership
-  degree_of_membership = Membership_fuzzy(X0, result, 2)
+  # degree_of_membership = Membership_fuzzy(X0, result, 2) # set 1/length(result$modes) as threshold
+  degree_of_membership = Membership_OKM(X0, result) # set 0.999 as threshold
   
   # ========== step 2: Goodness of fit ========== # 
   print("Step 2...")
@@ -84,7 +85,7 @@ for (i in 1:max_iteration) {
   all_dist[["4"]] <- "gamma"
   # all_dist[["5"]] <- "f"
   
-  dist_hash = GOF_KL_soft(X0, all_dist, degree_of_membership, 1/length(result$modes)) ## vsgoftest package
+  dist_hash = GOF_KL_soft(X0, all_dist, degree_of_membership, 0.999) ## vsgoftest package
   # dist_hash = GOF_KL(X0, all_dist, cluster_lab) ## vsgoftest package
   # dist_hash = GOF_goftest(X0, all_dist, cluster_lab, "CvM") ## goftest package
   # dist_hash = GOF_goft(X0, all_dist, cluster_lab) ## gof package

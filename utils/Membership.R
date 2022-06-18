@@ -1,4 +1,4 @@
-#' Data Refinement
+#' Determine degree of membership from result from nonparametric clustering
 #' 
 #' @param X Input data matrix.
 #' @param result result of nonparametric clustering (S3 object)
@@ -30,3 +30,46 @@ Membership_fuzzy = function(X, result, weight){
 
   return(Y)
 }
+
+
+
+
+Membership_OKM = function(X, result){
+  Y = matrix(0, nrow = length(X), ncol = length(result$modes))
+  
+  for (i in 1:length(X)) {
+    phi = 0
+    cnt = 0 # the number of elements in A_i  
+    while (1) {
+      if (cnt == length(result$modes)) {
+        break
+      }
+      
+      # m_star = argmin_m |xi-m|^2, where m is not in A_i
+      m_star = -1
+      dist = Inf
+      for(k in 1:length(result$modes)) {
+        if (Y[i,k] == 0 && (m_star == -1 || abs(X[i]-result$modes[k]) < dist)) {
+          dist = abs(X[i]-result$modes[k])
+          m_star = k
+        }
+      }
+      Y[i, m_star] = 1
+      
+      # compute newPhi with A_i+{m_star}
+      newPhi = (cnt*phi+result$modes[m_star]) / (cnt+1)
+  
+      if (cnt == 0 || abs(X[i]-phi) > abs(X[i]-newPhi)) {
+        phi = newPhi
+        cnt = cnt+1
+      } else {
+        Y[i, m_star] = 0
+        break
+      }
+    }
+  }
+  
+  return(Y)
+}
+
+
