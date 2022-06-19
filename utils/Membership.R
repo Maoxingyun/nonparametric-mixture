@@ -72,4 +72,35 @@ Membership_OKM = function(X, result){
   return(Y)
 }
 
+OPC_get_dif = function(X) {
+  #  dif is the top 5% percentile of distances of all object-pairs
+  D = c(1:(length(X)*(length(X)-1)/2))
+  idx = 1
+  for (i in 1:(length(X)-1)) {
+    for (j in (i+1):length(X)) {
+      D[idx] = abs(X[j]-X[i])
+      idx = idx+1
+    }
+  }
+  D = sort(D)        
+  dif = D[floor(0.95*length(D))]
+  return(dif)
+}
+
+
+Membership_OPC = function(X, result, dif = -1){
+  S = matrix(0, nrow = length(X), ncol = length(result$modes))
+  #  dif is the top 5% percentile of distances of all object-pairs
+  
+  for (i in 1:length(X)) {
+    # sij = 1-min(dij, dif) / dif
+    for(j in 1:length(result$modes)) {
+      S[i,j] = 1-min(abs(X[i]-result$modes[j]), dif) / dif
+    }
+    
+  }
+  
+  return(S)
+}
+
 
