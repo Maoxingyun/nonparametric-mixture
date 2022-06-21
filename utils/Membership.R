@@ -91,6 +91,9 @@ OPC_get_dif = function(X) {
 Membership_OPC = function(X, result, dif = -1){
   S = matrix(0, nrow = length(X), ncol = length(result$modes))
   #  dif is the top 5% percentile of distances of all object-pairs
+  if (dif == -1) {
+    dif = OPC_get_dif(X)
+  }
   
   for (i in 1:length(X)) {
     # sij = 1-min(dij, dif) / dif
@@ -102,5 +105,35 @@ Membership_OPC = function(X, result, dif = -1){
   
   return(S)
 }
+
+
+MCOKE_get_maxdist = function(X, result) {
+  #  maxdist =  max d(xj, vi) where j = 1,...,n, i = 1,...,C and xj in cluster ui
+  maxdist = 0
+  for (i in 1:length(X)) {
+    maxdist = max(maxdist, abs(X[i]-result$modes[result$cluster_lab[i]]))
+  }
+  return(maxdist)
+}
+
+
+Membership_MCOKE = function(X, result, maxdist = -1){
+  S = matrix(0, nrow = length(X), ncol = length(result$modes))
+  if (maxdist == -1) {
+    maxdist = MCOKE_get_maxdist(X, result)
+  }
+  
+  for (i in 1:length(X)) {
+    for(j in 1:length(result$modes)) {
+      if (abs(X[i]-result$modes[j]) <= maxdist) {
+        S[i,j] = 1
+      }
+    }
+    
+  }
+  
+  return(S)
+}
+
 
 
