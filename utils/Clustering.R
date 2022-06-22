@@ -6,10 +6,12 @@
 #' @export
 
 source('EMC_mod.R')
-Clustering_EMC = function(X){
+Clustering_EMC = function(X0){
+  X = scale(X0) ## scale only for EMC nonparametric clustering
   X_emc = EMC(X)
-  cluster_lab = X_emc$labels
-  return(cluster_lab)
+  result <- list(name = "Nonparametric_result", cluster_lab = X_emc$labels, modes = X_emc$modes)
+  result$modes = result$modes * sd(X0)+mean(X0)
+  return(result)
 }
 
 library('reticulate')

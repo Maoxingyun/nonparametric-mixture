@@ -3,6 +3,7 @@ library("TDA")
 library(fossil)
 library(MASS)
 source("Clustering.R")
+source("Membership.R")
 source("GOF.R")
 source("Refinement.R")
 
@@ -36,13 +37,13 @@ legend(7, 0.10, c("KDE","True distribution"), col=colscale[c(1,2)], lty=c(1,2), 
 
 # ========== Clustering algorithm ========== # 
 
-max_iteration = 5
+max_iteration = 1
 for (i in 1:max_iteration) {
   print(paste("Iteration", i))
   # ========== step 1: Nonparametric clustering ========== #
   print("Step 1...")
-  X = scale(X0) ## scale only for EMC nonparametric clustering
-  cluster_lab = Clustering_EMC(X) ## EMC method
+  result = Clustering_EMC(X0) ## EMC method
+  cluster_lab = result$cluster_lab
   # cluster_lab = Clustering_AWC(X0) ## AWC method
   
   # TODO
@@ -64,13 +65,18 @@ for (i in 1:max_iteration) {
   
   ## Visualization
   plot(yy, type="l", ylab="Density", xlab="x", las=1, lwd=2, main=paste("Iteration", i, ",Step 1"))
-  points(X0, y=rep(0,nrow(X)), pch=1, col=rainbow(max(cluster_lab))[cluster_lab])
+  points(X0, y=rep(0,length(X0)), pch=1, col=rainbow(max(cluster_lab))[cluster_lab])
   legend(7, 0.10, c("KDE"), col=colscale[c(1)], lty=c(1), lwd=2, bty="n")
   
-  # Evaluate the result
+  ## Evaluate the result
   print(paste("rand index:", rand.index(labels[which(labels!=-1)], cluster_lab[which(labels!=-1)])))
   print(paste("adjusted rand index:", adj.rand.index(labels[which(labels!=-1)], cluster_lab[which(labels!=-1)])))
   
+  ## Get degree of Membership
+  degree_of_membership = Membership_fuzzy(X0, result, 2) # set 1/length(result$modes) as threshold (good)
+  # degree_of_membership = Membership_OKM(X0, result) # set 0.999 as threshold
+  # degree_of_membership = Membership_OPC(X0, result) # set 0.8 as threshold (good)
+  # degree_of_membership = Membership_MCOKE(X0, result) # set 0.999 as threshold
   
   # ========== step 2: Goodness of fit ========== # 
   print("Step 2...")
@@ -81,18 +87,28 @@ for (i in 1:max_iteration) {
   all_dist[["4"]] <- "gamma"
   # all_dist[["5"]] <- "f"
   
-  # dist_hash = GOF_KL(X0, all_dist, cluster_lab) ## vsgoftest package
-  # dist_hash = GOF_goftest(X0, all_dist, cluster_lab, "AD") ## goftest package
+  
+  # dist_hash = GOF_KL(X0, all_dist, cluster_lab) ## vsgoftest package (good)
+  dist_hash = GOF_KL_soft(X0, all_dist, degree_of_membership, 1/length(result$modes)) ## vsgoftest package
+  # dist_hash = GOF_goftest(X0, all_dist, cluster_lab, "CvM") ## goftest package (good)
+  # dist_hash = GOF_goftest_soft(X0, all_dist, degree_of_membership, "CvM", 0.999) ## goftest package (good with fuzzy)
   # dist_hash = GOF_goft(X0, all_dist, cluster_lab) ## gof package
+  # dist_hash = GOF_goft_soft(X0, all_dist, degree_of_membership, 0.999) ## gof package (very good with OPC & MCOKE)
   # dist_hash = GOF_dbEmpLikeGOF(X0, all_dist, cluster_lab) ## dbEmpLikeGOF package
+  # dist_hash = GOF_dbEmpLikeGOF_soft(X0, all_dist, degree_of_membership, 0.999) ## dbEmpLikeGOF package
   # dist_hash = GOF_distrEx(X0, all_dist, cluster_lab, "TV") ## distrEx package about Helliger distance / Total variation distance
-  dist_hash = GOF_wasserstein(X0, all_dist, cluster_lab, 1) ## transport package about wasserstein distance
+  # dist_hash_soft = GOF_distrEx_soft(X0, all_dist, degree_of_membership, "TV", 0.999) ## distrEx package about Helliger distance / Total variation distance
+  # dist_hash = GOF_wasserstein(X0, all_dist, cluster_lab, 1) ## transport package about wasserstein distance (good)
+  # dist_hash = GOF_wasserstein_soft(X0, all_dist, degree_of_membership, 1, 0.999) ## transport package about wasserstein distance (good with fuzzy & OPC)
   
   
   ## The following three are from https://www.r-bloggers.com/2015/01/goodness-of-fit-test-in-r/
   # dist_hash = GOF_KS(X0, all_dist, cluster_lab) ## KS test method
+  # dist_hash = GOF_KS_soft(X0, all_dist, degree_of_membership, 0.999) ## KS test method (good with fuzzy & OPC)
   # dist_hash = GOF_CvM(X0, all_dist, cluster_lab) ## Cram¨¦r¨Cvon Mises criterion
+  # dist_hash = GOF_CvM_soft(X0, all_dist, degree_of_membership, 0.999) ## Cram¨¦r¨Cvon Mises criterion
   # dist_hash = GOF_Chi(X0, all_dist, cluster_lab) ## Chi square test
+  # dist_hash = GOF_Chi_soft(X0, all_dist, degree_of_membership, 0.999) ## Chi square test
   
   print("End of GOF")
   
@@ -109,11 +125,11 @@ for (i in 1:max_iteration) {
   ## (2.4) Helliger distance / Total variation distance / Wasserstein distance
   
   # ========== step 3: Data refinement ========== #
-  print("Step 3...")
-  refinement_result = Refinement(X0, labels, dist_hash, cluster_lab)
-  X0 = refinement_result$data
-  labels = refinement_result$labels
-  print(paste("Data size after Refinement: ", length(X0)))
+  # print("Step 3...")
+  # refinement_result = Refinement(X0, labels, dist_hash, cluster_lab)
+  # X0 = refinement_result$data
+  # labels = refinement_result$labels
+  # print(paste("Data size after Refinement: ", length(X0)))
 
   ## Visualization
   yy = density(X0)
